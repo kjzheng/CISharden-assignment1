@@ -1,0 +1,104 @@
+---
+- hosts: 127.0.0.1
+  become: yes
+  tasks:
+  
+    - name: Ensure SSH root login is disabled
+      lineinfile:
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin no"
+        path: /etc/ssh/sshd_config
+        state: present
+      check_mode: yes
+      register: PermitRootLoginpassfail
+      
+    - name: Ensure SSH PermitEmptyPasswords is disabled
+      lineinfile:
+        regexp: "^PermitEmptyPasswords"
+        line: "PermitEmptyPasswords no"
+        path: /etc/ssh/sshd_config
+        state: present
+      check_mode: yes
+      register: PermitEmptyPasswordspassfail
+      
+    - name: Ensure SSH Protocol is set to 2
+      lineinfile:
+        regexp: "^Protocol"
+        line: "Protocol 2"
+        path: /etc/ssh/sshd_config
+        state: present
+      check_mode: yes
+      register: EnsureSSHProcotolsetto2passfail
+
+
+    - name: Ensure password expiration is 90 days or less
+      lineinfile:
+        dest: /etc/login.defs
+        # check for pass max days of 91-99999 to change to 90,if cannot find, add a line of pass 90 days
+        regexp: '\b^PASS_MAX_DAYS\s*([9][1-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9]|[1-9][0-9][0-9][0-9][0-9])\b'
+        line: "PASS_MAX_DAYS   90"
+        state: present
+      check_mode: yes
+      register: pass90check1
+
+    - name: Ensure password expiration is 90 days or less(what happens when pass max days<90)
+      lineinfile:
+        dest: /etc/login.defs
+        # check for pass max days of 0-89 to absent the pass max days 90 line
+        regexp: '\b^PASS_MAX_DAYS\s*([0-9]|[1-8][0-9])\b'
+        line: "PASS_MAX_DAYS   90"
+        state: absent
+      check_mode: yes
+      register: pass90check2
+    #pass90check1.changed+passcheck2.ok = pass expire >90days
+    #pass90check1.ok+passcheck2.ok = pass expire 90days
+    #pass90check1.changed+passcheck2.changed = pass expire <90days
+       
+    - name: Ensure system accounts are secured non login get accounts
+      shell: "awk -F: '($3 < 1000) {print $1 }' /etc/passwd"          #-F: to be seperator string to seperate with :
+      register: accounts
+    
+    - name: Ensure system accounts are secured non login
+      user: 
+        name: "{{ item }}"
+        shell: /usr/sbin/nologin 
+      with_items:
+        - "{{accounts.stdout_lines | default([])}}"
+      when:
+        - item != "sync"
+        - item != "shutdown"
+        - item != "halt"
+        - item != "root"
+      check_mode: yes
+      register: Ensuresystemaccountsnonlogin
+
+    - debug:
+        msg: 
+          - "{{ '\nCIS Benchmarks check:' }}"
+          - "{{ '\nSSH root login is enabled, not compliant' if PermitRootLoginpassfail.changed else '\nSSH root login is disabled' }}"
+          - "{{ '\nSSH PermitEmptyPasswords is enabled, not compliant' if PermitEmptyPasswordspassfail.changed else '\nSSH PermitEmptyPasswords is disabled' }}"
+          - "{{ '\nSSH Protocol is not 2, not compliant' if EnsureSSHProcotolsetto2passfail.changed else '\nSSH Protocol is 2' }}"
+          - "{{ '\nPassword expiration is 91 days or more, not compliant' if pass90check1.changed and pass90check2 is not changed else '\nPassword expiration is 90days or less' }}"
+          - "{{ '\nSystem accounts are not secured to nonlogin, not compliant' if Ensuresystemaccountsnonlogin.changed else '\nSystem accounts are secured to nonlogin' }}"
+      register: benchmarkoutputs
+
+    - name: Echo to log file
+      shell: echo "$(date)\n{{benchmarkoutputs}}" >> CISbenchansible.log
+
+    - name: Send email of benchmarkoutputs
+      community.general.mail:
+        subtype: html
+        host: localhost
+        port: 25
+        to: kjz42324@gmail.com
+        subject: CIS Benchmarks check
+        body: 
+          - <h1>{{ 'CIS benchmarks' }}</h1>
+          - <p>{{ 'SSH root login is enabled, not compliant' if PermitRootLoginpassfail.changed else 'SSH root login is disabled'}}</p>
+          - <p>{{ 'SSH PermitEmptyPasswords is enabled, not compliant' if PermitEmptyPasswordspassfail.changed else 'SSH PermitEmptyPasswords is disabled'}}</p>
+          - <p>{{ 'SSH Protocol is not 2, not compliant' if EnsureSSHProcotolsetto2passfail.changed else 'SSH Protocol is 2'}}</p>
+          - <p>{{ 'Password expiration is 91 days or more, not compliant' if pass90check1.changed and pass90check2 is not changed else 'Password expiration is 90days or less'}}</p>
+          - <p>{{ 'System accounts are not secured to nonlogin, not compliant' if Ensuresystemaccountsnonlogin.changed else 'System accounts are secured to nonlogin'}}</p>
+      
+      when: 
+        - PermitRootLoginpassfail.changed or PermitEmptyPasswordspassfail.changed or EnsureSSHProcotolsetto2passfail.changed or pass90check1.changed and passcheck2 is not changed or Ensuresystemaccountsnonlogin.changed
