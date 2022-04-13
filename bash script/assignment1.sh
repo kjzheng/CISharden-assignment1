@@ -10,33 +10,33 @@ echo "$(date)" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 echo "CIS Benchmarks check:" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 
 if [[ -z "$PermitRootLoginpassfail" ]]; then
-  echo "SSH root login is enabled, not compliant" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
+  echo "Not compliant: SSH root login is enabled" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 elif [[ -n "$PermitRootLoginpassfail" ]]; then
-  echo "SSH root login is disabled" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
+  echo "Compliant: SSH root login is disabled" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 fi
 
 if [[ -z "$PermitEmptyPasswordspassfail" ]]; then
-  echo "SSH PermitEmptyPasswords is enabled, not compliant" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
+  echo "Not compliant: SSH PermitEmptyPasswords is enabled" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 elif [[ -n "$PermitEmptyPasswordspassfail" ]]; then
-  echo "SSH PermitEmptyPasswords is disabled" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
+  echo "Compliant: SSH PermitEmptyPasswords is disabled" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 fi
 
 if [[ -z "$EnsureSSHProcotolsetto2passfail" ]]; then
-  echo "SSH Protocol is not 2, not compliant" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
+  echo "Not compliant: SSH Protocol is not 2" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 elif [[ -n "$EnsureSSHProcotolsetto2passfail" ]]; then
-  echo "SSH Protocol is 2" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
+  echo "Compliant: SSH Protocol is 2" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 fi
 
 if [[ "$Ensurepasswordexpireless90days" -gt 90 ]]; then
-  echo "Password expiration is not 90 days or less, not compliant" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
+  echo "Not compliant: Password expiration is not 90 days or less" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 else
-  echo "Password expiration is 90days and less" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
+  echo "Compliant: Password expiration is 90days and less" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 fi
 
 if [[ -n "$Ensuresystemaccountsnonlogin" ]]; then
-  echo "System accounts are not secured to nonlogin, not compliant" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
+  echo "Not compliant: System accounts are not secured to nonlogin" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 elif [[ -z "$Ensuresystemaccountsnonlogin" ]]; then
-  echo "System accounts are secured to nonlogin" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
+  echo "Compliant: System accounts are secured to nonlogin" >> ~/zzz/MSS\ assignment\ 1/bash\ script/CISbench.log
 fi
 
 if [[ -z "$PermitRootLoginpassfail" ]] || [[ -z "$PermitEmptyPasswordspassfail" ]] || [[ -z "$EnsureSSHProcotolsetto2passfail" ]] || [[ "$Ensurepasswordexpireless90days" -gt 90 ]] || [[ -n "$Ensuresystemaccountsnonlogin" ]]; then
