@@ -63,7 +63,7 @@
         name: "{{ item }}"
         shell: /usr/sbin/nologin 
       with_items:
-        - "{{accounts.stdout_lines | default([])}}"
+        - "{{accounts.stdout_lines}}"
       when:
         - item != "sync"
         - item != "shutdown"
