@@ -14,6 +14,10 @@ https://marshallcyberclub.github.io/resources/CIS%20Ubuntu%2018.04.pdf reference
 
 5.4.1.1 (Expiration is set to be 90 or less not 365)
 
-5.4.2 (only set shell is used, locking of accounts is not used)
+5.4.2 (only set shell to nologin is used, locking of accounts is not used)
 
-change the email recipient under mail for both bash and ansible 
+------------------------------------------------------------------------------------------------------------
+
+Change the email recipient under mail for both bash and ansible 
+
+Change the path in bash script to fit your own
