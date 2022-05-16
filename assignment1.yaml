@@ -86,6 +86,8 @@
       shell: echo "$(date)\n{{benchmarkoutputs}}" >> CISbenchansible.log
 
     - name: Send email of benchmarkoutputs
+    #sudo apt-get install mailutils
+    #for sending emails from root to work
       community.general.mail:
         subtype: html
         host: localhost
